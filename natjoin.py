@@ -1,31 +1,26 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[7]:
 
 
-# example_table_one = [{"name": " ", "age": 21, "year": 1957},
-#                     {"name": " ", "age": 21, "year": 1957},
-#                     {"name": " ", "age": 21, "year": 1957},
-#                     {"name": " ", "age": 21, "year": 1957},
-#                     {"name": " ", "age": 21, "year": 1957},
-#                     {"name": " ", "age": 21, "year": 1957}]
-# example_table_two = [{"name": " ", "age": 21, "year": 1957, "g": "a"},
-#                     {"name": " ", "age": 21, "year": 1957, "g": "b"},
-#                     {"name": " ", "age": 21, "year": 1958, "g": "c"},
-#                     {"name": " ", "age": 42, "year": 1958, "g": "d"},
-#                     {"name": " ", "age": 42, "year": 1958, "g": "e"},
-#                     {"name": " ", "age": 42, "year": 1958, "g": "f"}]
-# example_table_three = [{"name": " ", "age": 21, "year": 1957, "h": "a"},
-#                     {"name": " ", "age": 63, "year": 1959, "h": None},
-#                     {"name": " ", "age": 63, "year": 1959, "h": None},
-#                     {"name": " ", "age": 63, "year": 1959, "h": None},
-#                     {"name": " ", "age": 21, "year": 1957, "h": None},
-#                     {"name": " ", "age": 63, "year": 1959, "h": None}]
-# example_table_four = [{"id": " ", "birth": " ", "death": " "}]
+example_table_one = [{"name": " ", "age": 21, "year": 1957},
+                    {"name": "yikes", "age": 21, "year": 1938},
+                    {"name": "i'm", "age": 21, "year": 2512},
+                    {"name": "so", "age": 21, "year": 1914},
+                    {"name": "bleh", "age": 21, "year": 1932},
+                    {"name": "right now", "age": 21, "year": 1957}]
+example_table_two = [{"name": " ", "age": 21, "g": "a"},
+                    {"name": " ", "age": 21, "g": "b"},
+                    {"name": " ", "age": 21, "g": "c"},
+                    {"name": " ", "age": 42, "g": "d"},
+                    {"name": " ", "age": 42, "g": "e"},
+                    {"name": " ", "age": 42, "g": "f"}]
+example_table_three = [{"name": "nothing good ever happens", "age": 0, "year": 1923, "h": "a"}]
+example_table_four = [{"id": " ", "birth": " ", "death": " "}]
 
 
-# In[2]:
+# In[8]:
 
 
 def cartesian_product(r,s):
@@ -44,10 +39,13 @@ def cartesian_product(r,s):
 # cartesian_product(example_table_one, example_table_four)
 
 
-# In[4]:
+# In[14]:
 
 
 def classic_hash_join(r, s):
+    if len(s) == 0 or len(r) == 0:
+        return []
+    
     r_attributes = r[0].keys()
     s_attributes = s[0].keys()
     common_attributes = list(filter(lambda ra: ra in s_attributes, r_attributes))
@@ -83,12 +81,13 @@ def classic_hash_join(r, s):
                     new_entry.update(filtered_dict)
                     output.append(new_entry)
             hashkey=""
+            
         return output
     else:
         return cartesian_product(r,s)
 
 
-# In[5]:
+# In[15]:
 
 
 def natural_join(tables):
@@ -98,10 +97,10 @@ def natural_join(tables):
     return l1
 
 
-# In[6]:
+# In[16]:
 
 
-# natural_join([example_table_two, example_table_three])
+natural_join([example_table_one,[]])
 
 
 # In[ ]:
