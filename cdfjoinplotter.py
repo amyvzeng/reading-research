@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[6]:
 
 
 import cdfjoin
@@ -16,7 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# In[2]:
+# In[7]:
 
 
 def plot_intermediate(tables, x, size = True):
@@ -30,7 +30,7 @@ def plot_intermediate(tables, x, size = True):
     return values
 
 
-# In[3]:
+# In[8]:
 
 
 def outputsize_plot(tables):
@@ -47,7 +47,7 @@ def outputsize_plot(tables):
     plt.legend(loc='best')
 
 
-# In[4]:
+# In[9]:
 
 
 def runtime_plot(tables, sampling_threshold):
@@ -64,16 +64,16 @@ def runtime_plot(tables, sampling_threshold):
     plt.legend(loc='best')
 
 
-# In[5]:
+# In[ ]:
 
 
-outputsize_plot(loadimdb.tables)
+outputsize_plot([loadimdb.t1,loadimdb.t2])
 
 
-# In[6]:
+# In[ ]:
 
 
-runtime_plot(loadimdb.tables, .5)
+#runtime_plot(loadimdb.tables, .5)
 
 
 # In[ ]:
