@@ -1,28 +1,31 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[6]:
+# In[1]:
 
 
 import cdfjoin
 import natjoin
 import cdfsampler
-import loadimdb
+from loadimdb import table_pairs
+from loadimdb import joined_table_indices
 from datetime import datetime
 from scipy.special import comb
 from scipy import linspace
+import random
 import timeit
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-# In[7]:
+# In[2]:
 
 
 def plot_intermediate(tables, x, size = True):
     values = []
+    random_threshold = random.uniform(0,1)
     for threshold in x:
-        result = cdfjoin.cdfjoin(tables, threshold)
+        result = cdfjoin.cdfjoin(tables, threshold, random_threshold)
         if size:
             values.append([len(result[0][0]), len(result[1][0])])
         else:
@@ -30,7 +33,7 @@ def plot_intermediate(tables, x, size = True):
     return values
 
 
-# In[8]:
+# In[3]:
 
 
 def outputsize_plot(tables):
@@ -47,10 +50,10 @@ def outputsize_plot(tables):
     plt.legend(loc='best')
 
 
-# In[9]:
+# In[4]:
 
 
-def runtime_plot(tables, sampling_threshold):
+def runtime_plot(tables):
     plt.style.use('seaborn')
     plt.rcParams['figure.figsize'] = (12, 8)
     plt.ylabel('Runtime')
@@ -64,16 +67,118 @@ def runtime_plot(tables, sampling_threshold):
     plt.legend(loc='best')
 
 
+# In[5]:
+
+
+runtime_plot(table_pairs[12])
+
+
+# In[6]:
+
+
+outputsize_plot(table_pairs[12])
+
+
 # In[ ]:
 
 
-outputsize_plot([loadimdb.t1,loadimdb.t2])
+
 
 
 # In[ ]:
 
 
-#runtime_plot(loadimdb.tables, .5)
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:

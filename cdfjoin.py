@@ -6,7 +6,6 @@
 
 import cdfsampler
 import natjoin
-import loadimdb
 import minhash
 import random
 import time
@@ -35,7 +34,7 @@ def remove_hashsum_key(tables):
 # In[4]:
 
 
-def cdfjoin(tables, sampling_threshold, timer=0):
+def cdfjoin(tables, sampling_threshold, random_threshold=0.0, timer=0):
     if len(tables) <= 1:
         return tables
     else:
@@ -104,12 +103,13 @@ def cdfjoin(tables, sampling_threshold, timer=0):
         start = time.time()
         for i in range(len(tables)):
             table = tables_copy[i]
-            random_threshold = random.uniform(0,1)
+            if random_threshold == 0.0:
+                random_threshold = random.uniform(0,1)
             random_table = []
             if "hash sum" in table[0].keys():
                 n_join_attrs = len([i for i in table[0].keys() if i in join_attrs])
                 for entry in table:
-                    if cdfsampler.cdf(n_join_attrs, entry["hash sum"]) <= random_threshold:
+                    if random_threshold < cdfsampler.cdf(n_join_attrs, entry["hash sum"]):
                         random_table.append(entry)
             else:
                 random_table = table
@@ -140,16 +140,16 @@ def cdfjoin(tables, sampling_threshold, timer=0):
         return [(joined_filtered_tables, filtered_time), (joined_random_tables, random_time)]
 
 
-# In[5]:
+# In[ ]:
 
 
-cdfjoin(loadimdb.tables, .5)
 
 
-# In[6]:
+
+# In[ ]:
 
 
-cdfjoin(loadimdb.tables, .3)
+
 
 
 # In[ ]:

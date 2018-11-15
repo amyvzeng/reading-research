@@ -6,6 +6,7 @@
 
 import csv
 import natjoin
+from copy import deepcopy
 
 
 # In[2]:
@@ -37,6 +38,8 @@ kind_type = ["id", "kind"]
 link_type = ["id", "link"]
 movie_companies = ["id", "movie_id", "company_id",
                   "company_type_id", "note"]
+movie_info = ["id", "movie_id", "info_type_id",
+             "info", "note"]
 movie_info_idx = ["id", "movie_id", "info_type_id",
                  "info", "note"]
 movie_keyword = ["id", "movie_id", "keyword_id"]
@@ -50,10 +53,8 @@ title = ["id", "title", "imdb_index",
         "kind_id", "production_year", "imdb_id",
         "phonetic_code", "episode_of_id", "season_nr",
         "series_years", "md5sum"]
-movie_info = ["id", "movie_id", "info_type_id",
-             "info", "note"]
-# person_info = ["id", "person_id", "info_type_id",
-#               "info", "note"]
+person_info = ["id", "person_id", "info_type_id",
+              "info", "note"]
 
 
 # In[3]:
@@ -64,7 +65,7 @@ csv_names = {"aka_name": aka_name, "aka_title": aka_title, "cast_info": cast_inf
              "complete_cast": complete_cast, "info_type": info_type, "keyword": keyword, 
              "kind_type": kind_type, "link_type": link_type, "movie_companies": movie_companies, 
              "movie_info": movie_info, "movie_info_idx": movie_info_idx, "movie_keyword": movie_keyword, "movie_link": movie_link,
-            "name": name, "role_type": role_type, "title": title, "movie_info": movie_info}
+            "name": name, "role_type": role_type, "title": title, "person_info": person_info}
 
 
 # In[4]:
@@ -83,147 +84,148 @@ for csv_title in csv_names.keys():
                 break
             else:
                 counter += 1
-                table.append({headers[i]: row[i] for i in range(1, len(headers))})
+                table.append({headers[i]: row[i] for i in range(len(headers))})
     csv_tables[csv_title] = table
 
 
 # In[5]:
 
 
-sqlqueries = []
-with open('sqlqueries.txt', 'r') as f:
+with open('edited-queries.txt', 'r') as f:
     content = f.readlines()
     
+table_info = []
+join_attr_info = []
+
+line_ctr=0
 for line in content:
     if line != "\n":
-        sqlqueries.append(line.split("\n")[0])
+        line = line.strip().strip(';')
+        if line_ctr % 2 == 0:
+            new_tables = line.split(", ")
+            table_info.extend([table for table in new_tables if table not in table_info])
+        else:
+            new_attrs = line.split(" AND ")
+            join_attr_info.extend([attr for attr in new_attrs if attr not in join_attr_info])
+        line_ctr+=1
         
-queries = {}
-for query in sqlqueries:
-    select = query.split("SELECT ")[1].split(" FROM ")[0]
-    from_tables = query.split(" FROM ")[1].split(" WHERE ")[0]
-    attrs = query.split(" FROM ")[1].split(" WHERE ")[1]
-#     print(select)
-#     print(from_tables)
-#     print(attrs)
-#     print("\n")
+tables = {}
+for table in table_info:
+    info = table.split(" AS ")
+    tables[info[1]] = [deepcopy(entry) for entry in csv_tables[info[0]]]
 
 
 # In[6]:
 
 
-ct = csv_tables["company_type"].copy()
-it = csv_tables["info_type"].copy()
-mc = csv_tables["movie_companies"].copy()
-mi_idx = csv_tables["movie_info_idx"].copy()
-t = csv_tables["title"].copy()
-cn = csv_tables["company_name"].copy()
-mk = csv_tables["movie_keyword"].copy()
-mi = csv_tables["movie_info"].copy()
-k = csv_tables["keyword"].copy()
+# def join_tables_on_key(t1, t2, t1_key, t2_key):
+#     table = []
+#     for entry1 in t1:
+#         for entry2 in t2:
+#             if entry1[t1_key] == entry2[t2_key]:
+#                 entry = entry1
+#                 if t1_key==t2_key:
+#                     for k,v in entry2.items():
+#                         if k != t2_key:
+#                             entry[k] = v
+#                 else:
+#                     entry.update(entry2)
+#                 table.append(entry)
+#     return table
 
 
 # In[7]:
 
 
-def find_min(table, key):
-    min_val = table[0][key]
-    for entry in table:
-        if entry[key] < min_val and entry[key] != '':
-            min_val = entry[key]
-    return min_val
+# def create_joined_tables():
+#     joined_tables = []
+#     for join_attr in join_attr_info:
+#         attrs = join_attr.split(" = ")
+#         join_1 = attrs[0].split(".")
+#         join_2 = attrs[1].split(".")
+#         table = join_tables_on_key(tables[join_1[0]].copy(), tables[join_2[0]].copy(), join_1[1], join_2[1])
+#         if table != []:
+#             joined_tables.append(table)
+#     return joined_tables
 
 
 # In[8]:
 
 
-def replace_key(table, original_key, new_key):
-    for entry in table:
-        entry[new_key] = entry[original_key]
-        #print(entry[original_key])
-        #del entry[original_key]
-    return table
+#final_tables = create_joined_tables()
 
 
 # In[9]:
 
 
-def insert_key(table, new_key):
-    counter = 1
+def insert_key(table, original_key):
     for entry in table:
-        entry[new_key] = counter
-        counter+=1
+        entry["id"] = entry[original_key]
     return table
 
 
 # In[10]:
 
 
-mc = replace_key(mc, "company_type_id", "id")
-t3 = natjoin.natural_join([mc, ct])
+def remove_key(table, keys):
+    for entry in table:
+        for key in keys:
+            del entry[key]
+    return table
 
 
 # In[11]:
 
 
-t1 = natjoin.natural_join([csv_tables["movie_companies"], csv_tables["movie_info_idx"]])
+def create_tables_to_join():
+    table_pairs = []
+    for join_attr in join_attr_info:
+        attrs = join_attr.split(" = ")
+        join_1 = attrs[0].split(".")
+        join_2 = attrs[1].split(".")
+        table_1 = deepcopy(tables[join_1[0]])
+        table_2 = deepcopy(tables[join_2[0]])
+        common_attrs = [attr for attr in table_1[0].keys() if attr in table_2[0].keys()]
+        common_attrs = [attr for attr in common_attrs if attr != join_1[1] and attr != join_2[1]]
+        if join_1[1] != 'id':
+            table_1 = insert_key(table_1, join_1[1])
+        if join_2[1] != 'id':
+            table_2 = insert_key(table_2, join_2[1])
+        table_1 = remove_key(table_1, common_attrs)
+        table_2 = remove_key(table_2, common_attrs)
+        table_pairs.append([table_1, table_2])
+    return table_pairs
+
+
+# In[12]:
+
+
+table_pairs = create_tables_to_join()
+
+
+# In[13]:
+
+
+def attempts_at_joining(pairs):
+    joined_table_indices = []
+    for i in range(len(pairs)):
+        table_1 = pairs[i][0]
+        table_2 = pairs[i][1]
+        if len(natjoin.natural_join([deepcopy(table_1), deepcopy(table_2)])) != 0:
+            joined_table_indices.append(i)
+    return joined_table_indices
+
+
+# In[14]:
+
+
+joined_table_indices = attempts_at_joining(table_pairs)
 
 
 # In[ ]:
 
 
-cn = insert_key(cn, "company_id")
-t2 = natjoin.natural_join([cn, csv_tables["movie_companies"]])
 
-
-# In[ ]:
-
-
-mk = replace_key(mk, "movie_id", "id")
-t4 = natjoin.natural_join([mk, t])
-
-
-# In[ ]:
-
-
-# mk = csv_tables["movie_keyword"].copy()
-# t5 = natjoin.natural_join([mk, mi_idx])
-
-
-# # In[ ]:
-
-
-# mk = replace_key(mk, "keyword_id", "id")
-# t6 = natjoin.natural_join([mk, k])
-# print(t6)
-
-
-# # In[ ]:
-
-
-# mc = replace_key(csv_tables["movie_companies"], "movie_id", "id")
-# t7 = natjoin.natural_join([t, mc])
-# print(t7)
-
-
-# # In[ ]:
-
-
-# t8 = natjoin.natural_join([csv_tables["company_info"], csv_tables["movie_keyword"]])
-
-
-# # In[ ]:
-
-
-# ci = csv_tables["company_info"]
-# replace_key(ci, "person_id", "id")
-# t9 = natjoin.natural_join([ci, csv_tables["name"]])
-
-
-# In[ ]:
-
-
-# print(t6)
 
 
 # In[ ]:

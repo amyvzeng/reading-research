@@ -1,26 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[7]:
+# In[1]:
 
 
-example_table_one = [{"name": " ", "age": 21, "year": 1957},
-                    {"name": "yikes", "age": 21, "year": 1938},
-                    {"name": "i'm", "age": 21, "year": 2512},
-                    {"name": "so", "age": 21, "year": 1914},
-                    {"name": "bleh", "age": 21, "year": 1932},
-                    {"name": "right now", "age": 21, "year": 1957}]
-example_table_two = [{"name": " ", "age": 21, "g": "a"},
-                    {"name": " ", "age": 21, "g": "b"},
-                    {"name": " ", "age": 21, "g": "c"},
-                    {"name": " ", "age": 42, "g": "d"},
-                    {"name": " ", "age": 42, "g": "e"},
-                    {"name": " ", "age": 42, "g": "f"}]
-example_table_three = [{"name": "nothing good ever happens", "age": 0, "year": 1923, "h": "a"}]
-example_table_four = [{"id": " ", "birth": " ", "death": " "}]
+from copy import deepcopy
 
 
-# In[8]:
+# In[2]:
 
 
 def cartesian_product(r,s):
@@ -39,7 +26,7 @@ def cartesian_product(r,s):
 # cartesian_product(example_table_one, example_table_four)
 
 
-# In[14]:
+# In[4]:
 
 
 def classic_hash_join(r, s):
@@ -58,8 +45,7 @@ def classic_hash_join(r, s):
         #build hash table
         row_index = 0
         for entry in r:
-            for attribute in common_attributes:
-                hashkey += str(entry[attribute])
+            hashkey = "".join([entry[attribute] for attribute in common_attributes if attribute in entry.keys()])
             if hashkey not in hashtable_keys:
                 hashtable[hashkey] = [row_index]
                 hashtable_keys.append(hashkey)
@@ -67,13 +53,11 @@ def classic_hash_join(r, s):
                 hashtable[hashkey].append(row_index)
             hashkey = ""
             row_index+=1
-
         
         #join
         output = []
         for entry in s:
-            for attribute in common_attributes:
-                hashkey += str(entry[attribute])
+            hashkey = "".join([entry[attribute] for attribute in common_attributes if attribute in entry.keys()])
             if hashkey in hashtable_keys:
                 filtered_dict = {k:v for (k,v) in entry.items() if k in s_unique_attributes}
                 for r_index in hashtable[hashkey]:
@@ -87,7 +71,7 @@ def classic_hash_join(r, s):
         return cartesian_product(r,s)
 
 
-# In[15]:
+# In[5]:
 
 
 def natural_join(tables):
@@ -97,10 +81,16 @@ def natural_join(tables):
     return l1
 
 
-# In[16]:
+# In[ ]:
 
 
-natural_join([example_table_one,[]])
+
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:
